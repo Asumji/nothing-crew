@@ -53,7 +53,7 @@ module.exports = {
 						} else if (crewDB[crew].members.includes(value)) {
 							returnee = "Du bist bereits in einer Crew!"
 						} else if (crewDB[crew].owner == value) {
-							returnee = "Du besitzst bereits eine Crew!"
+							returnee = "Du besitzt bereits eine Crew!"
 						}
 					}
 				}
@@ -96,7 +96,7 @@ module.exports = {
 					if (interaction.options.getUser("user").id != interaction.applicationId)
 					if (checkCrew([interaction.options.getUser("user").id]) == true) {
 						if (interaction.options.getUser("user").id != interaction.applicationId) {
-							if (checkCrew([interaction.user.id]) == "Du besitzst bereits eine Crew!") {
+							if (checkCrew([interaction.user.id]) == "Du besitzt bereits eine Crew!") {
 								interaction.options.getUser("user").send({content: interaction.user.username + " hat dich zu einer Crew eingeladen!", components: [row]}).then(ch=> {
 									interaction.reply({content: "Du hast <@!" + interaction.options.getUser("user") + "> zu deiner Crew eingeladen!", ephemeral:true})
 									const collector = ch.createMessageComponentCollector({ time: 15000 });
@@ -130,7 +130,7 @@ module.exports = {
 									});
 								}).catch(() => interaction.reply({content:"Dieser User nimmt keine DMs an!",ephemeral:true}))
 							} else {
-								interaction.reply({content:"Du besitzst diese Crew nicht!",ephemeral:true})
+								interaction.reply({content:"Du besitzt diese Crew nicht!",ephemeral:true})
 							}
 						} else {
 							interaction.reply({content:"Ich kann in keine Crew eingeladen werden!",ephemeral:true})

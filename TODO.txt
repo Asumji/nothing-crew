@@ -1,3 +1,2 @@
-#git control
+#all crews display
 #siehe Discord: shop, quests
-#trello?

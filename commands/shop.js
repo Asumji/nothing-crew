@@ -29,6 +29,7 @@ module.exports = {
             .addStringOption(option => option.setName("name").setDescription("Der Name des Items").setRequired(true))
             .addStringOption(option => option.setName("description").setDescription("Die Beschreibung des Items").setRequired(true))
             .addIntegerOption(option => option.setName("price").setDescription("Der Preis des Items").setRequired(true))
+            .addBooleanOption(option => option.setName("repeatable").setDescription("Soll das Item mehrmals kaufbar sein oder nicht?").setRequired(true))
         )
         .addSubcommand(sub => 
             sub.setName("removeitem")
@@ -57,12 +58,25 @@ module.exports = {
 			}
 		}
 
+        function hasRepeatables() {
+            for (let item in shopDB) {
+                if (shopDB[item].repeatable == true) {
+                    return true
+                }
+            }
+            return false
+        }
+
         function getItems() {
             let string = ""
-            if (Object.keys(shopDB).length > crewDB[getCrew(interaction.user.id)].items.length) {
+            if (Object.keys(shopDB).length > crewDB[getCrew(interaction.user.id)].items.length || hasRepeatables()) {
                 for (let item in shopDB) {
-                    if (!crewDB[getCrew(interaction.user.id)].items.includes(item)) {
-                        string = string + "**" + item + "**\n" + shopDB[item].description + "\nPreis: " + shopDB[item].price + " Punkte\n\n"
+                    if (!crewDB[getCrew(interaction.user.id)].items.includes(item) || shopDB[item].repeatable == true) {
+                        if (shopDB[item].repeatable) {
+                            string = string + "**" + item + "** (♻️)\n" + shopDB[item].description + "\nPreis: " + shopDB[item].price + " Punkte\n\n"
+                        } else {
+                            string = string + "**" + item + "**\n" + shopDB[item].description + "\nPreis: " + shopDB[item].price + " Punkte\n\n"
+                        }
                     }
                 }
             } else {
@@ -127,6 +141,7 @@ module.exports = {
                 .setColor("Random")
                 .setTitle("Shop")
                 .setDescription(getItems())
+                .setFooter({text: "(♻️) => mehrmals kaufbar"})
 
                 interaction.reply({embeds:[embed],ephemeral: true})
             } else if (interaction.options._subcommand == "inventory") {
@@ -139,16 +154,20 @@ module.exports = {
             } else if (interaction.options._subcommand == "buy") {
                 if (crewDB[getCrew(interaction.user.id)].owner == interaction.user.id) {
                     if (shopDB.hasOwnProperty(interaction.options.getString("item"))) {
-                        if (crewDB[getCrew(interaction.user.id)].tokens >= shopDB[interaction.options.getString("item")].price) {
-                            crewDB[getCrew(interaction.user.id)].items.push(interaction.options.getString("item"))
-                            crewDB[getCrew(interaction.user.id)].tokens -= shopDB[interaction.options.getString("item")].price
+                        if (!crewDB[getCrew(interaction.user.id)].items.includes(interaction.options.getString("item")) || shopDB[interaction.options.getString("item")].repeatable == true) {
+                            if (crewDB[getCrew(interaction.user.id)].tokens >= shopDB[interaction.options.getString("item")].price) {
+                                crewDB[getCrew(interaction.user.id)].items.push(interaction.options.getString("item"))
+                                crewDB[getCrew(interaction.user.id)].tokens -= shopDB[interaction.options.getString("item")].price
 
-                            fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
-                                console.log(err);
-                            });
-                            interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
+                                fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+                                    console.log(err);
+                                });
+                                interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
+                            } else {
+                                interaction.reply({content:"Deine Crew hat nicht genug Punkte!",ephemeral:true})
+                            }
                         } else {
-                            interaction.reply({content:"Deine Crew hat nicht genug Punkte!",ephemeral:true})
+                            interaction.reply({content:"Du besitzt bereits dieses Item!",ephemeral:true})
                         }
                     } else {
                         interaction.reply({content:"Diese Item existiert nicht!",ephemeral:true})
@@ -184,7 +203,8 @@ module.exports = {
                     shopDB[interaction.options.getString("name")] = {
                         name: interaction.options.getString("name"),
                         description: interaction.options.getString("description"),
-                        price: interaction.options.getInteger("price")
+                        price: interaction.options.getInteger("price"),
+                        repeatable: interaction.options.getBoolean("repeatable")
                     }
                     fs.writeFileSync("./databases/shop.json", JSON.stringify(shopDB, null, 4), err => {
                         console.log(err);

@@ -29,7 +29,7 @@ module.exports = {
             if (crewDB.hasOwnProperty(interaction.options.getString("crew"))) {
                 if (interaction.options._subcommand == "add") {
                     crewDB[interaction.options.getString("crew")].tokens += interaction.options.getInteger("amount")
-                    interaction.reply({content:"Du hast " + interaction.options.getInteger("amount").toString() + " Punkte zu der Crew" + interaction.options.getString("crew") + " hinzugefügt.",ephemeral:true})
+                    interaction.reply({content:"Du hast " + interaction.options.getInteger("amount").toString() + " Punkte zu der Crew " + interaction.options.getString("crew") + " hinzugefügt.",ephemeral:true})
                 } else if (interaction.options._subcommand == "remove") {
                     crewDB[interaction.options.getString("crew")].tokens -= interaction.options.getInteger("amount")
                     interaction.reply({content:"Du hast " + interaction.options.getInteger("amount").toString() + " Punkten von der Crew " + interaction.options.getString("crew") + " weggenommen!",ephemeral:true})

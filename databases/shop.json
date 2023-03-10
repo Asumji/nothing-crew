@@ -1,12 +1,20 @@
 {
-    "pog gamer shoes": {
-        "name": "pog gamer shoes",
-        "description": "very poggers shoes for gamers only",
-        "price": 5000
+    "fortnite 3": {
+        "name": "fortnite 3",
+        "description": "einfach 3. teil omg fortnite",
+        "price": 900,
+        "repeatable": false
     },
-    "stonks": {
-        "name": "stonks",
-        "description": "much stonks very yes",
-        "price": 5
+    "fortnite 2": {
+        "name": "fortnite 2",
+        "description": "ad",
+        "price": 5,
+        "repeatable": true
+    },
+    "ad": {
+        "name": "ad",
+        "description": "awd",
+        "price": 5,
+        "repeatable": false
     }
 }
