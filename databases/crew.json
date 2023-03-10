@@ -1,0 +1,24 @@
+{
+    "pog gaming squad the sequel": {
+        "name": "pog gaming squad the sequel",
+        "tag": "POG",
+        "members": [
+            "1008017030999453727"
+        ],
+        "owner": "612625159656046643",
+        "categoryID": "1058158714277871656",
+        "tokens": 59990,
+        "items": [
+            "stonks"
+        ]
+    },
+    "test": {
+        "name": "test",
+        "tag": "TES",
+        "members": [],
+        "owner": "617348743641038858",
+        "categoryID": "1058134947812089907",
+        "tokens": 0,
+        "items": []
+    }
+}
