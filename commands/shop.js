@@ -48,7 +48,7 @@ module.exports = {
             .addStringOption(option => option.setName("value").setDescription("Der neue Inhalt").setRequired(true))
         ),
     async execute(interaction) {
-        const { shopDB, crewDB } = require("../index.js")
+        const { shopDB, crewDB, channelDB } = require("../index.js")
 
         function getCrew(userID) {
 			for (let crew in crewDB) {
@@ -92,6 +92,17 @@ module.exports = {
                 string = string + crewDB[getCrew(interaction.user.id)].items[item] + " **|** Wert: " + shopDB[crewDB[getCrew(interaction.user.id)].items[item]].price + " Punkte\n"
             }
             return string
+        }
+
+        function openTicket() {
+            for (let channel in channelDB) {
+                if (channel != "allcrews" || channel != "redeemitem") {
+                    if (channelDB[channel].ownerid == interaction.user.id) {
+                        return true
+                    }
+                }
+            }
+            return false
         }
 
         function editItem(item,property,value) {
@@ -156,13 +167,33 @@ module.exports = {
                     if (shopDB.hasOwnProperty(interaction.options.getString("item"))) {
                         if (!crewDB[getCrew(interaction.user.id)].items.includes(interaction.options.getString("item")) || shopDB[interaction.options.getString("item")].repeatable == true) {
                             if (crewDB[getCrew(interaction.user.id)].tokens >= shopDB[interaction.options.getString("item")].price) {
-                                crewDB[getCrew(interaction.user.id)].items.push(interaction.options.getString("item"))
-                                crewDB[getCrew(interaction.user.id)].tokens -= shopDB[interaction.options.getString("item")].price
+                                if (!openTicket()) {
+                                    crewDB[getCrew(interaction.user.id)].items.push(interaction.options.getString("item"))
+                                    crewDB[getCrew(interaction.user.id)].tokens -= shopDB[interaction.options.getString("item")].price
 
-                                fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
-                                    console.log(err);
-                                });
-                                interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
+                                    fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+                                        console.log(err);
+                                    });
+
+                                    if (channelDB["allcrews"] && interaction.guild.channels.cache.get(channelDB["allcrews"].id) != undefined) {
+                                        await interaction.guild.channels.cache.get(channelDB["redeemitem"].id).threads.create({name:"Item Gekauft - " + interaction.options.getString("item"), message:{content:"Die Crew " + crewDB[getCrew(interaction.user.id)].name + " hat gerade " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!\nDiese hat jetzt noch ein Guthaben von " + crewDB[getCrew(interaction.user.id)].tokens + "!\nCrew Owner ID: " + interaction.user.id}}).then(thread => {
+                                            channelDB[thread.id] = {
+                                                ownerid: interaction.user.id,
+                                                threadID: thread.id,
+                                                guildid: thread.guild.id
+                                            }
+
+                                            fs.writeFileSync("./databases/channels.json", JSON.stringify(channelDB, null, 4), err => {
+                                                console.log(err);
+                                            });
+                                        })
+                                        await interaction.user.send("Du hast gerade das Item " + interaction.options.getString("item") + " gekauft, ein Teammiglied wird es für dich bald einlösen.").catch(() => "Die DMs von " + interaction.user.tag + " sind geschlossen also konnte ich kein Ticket öffnen.")
+                                    }
+
+                                    interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
+                                } else {
+                                    interaction.reply({content:"Du hast bereits ein offenes Item-Ticket!",ephemeral:true})
+                                }
                             } else {
                                 interaction.reply({content:"Deine Crew hat nicht genug Punkte!",ephemeral:true})
                             }

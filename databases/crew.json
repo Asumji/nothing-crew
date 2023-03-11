@@ -3,8 +3,7 @@
         "name": "pog gaming squad the sequel",
         "tag": "POG",
         "members": [
-            "1008017030999453727",
-            "617348743641038858"
+            "1008017030999453727"
         ],
         "owner": "5",
         "categoryID": "1083772736813412443",
@@ -22,8 +21,13 @@
         "members": [],
         "owner": "617348743641038858",
         "categoryID": "1058134947812089907",
-        "tokens": 0,
-        "items": []
+        "tokens": 499980,
+        "items": [
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2"
+        ]
     },
     "fortnite": {
         "name": "fortnite",
@@ -31,17 +35,29 @@
         "members": [],
         "owner": "6",
         "categoryID": "1083866573158232125",
-        "tokens": 5,
+        "tokens": 502029,
         "items": []
     },
-    "fortnite 2": {
-        "name": "fortnite 2",
-        "tag": "FÜR",
+    "roblox gang": {
+        "name": "roblox gang",
+        "tag": "RBX",
         "members": [],
         "owner": "612625159656046643",
-        "categoryID": "1083866785239023717",
-        "tokens": 0,
+        "categoryID": "1084088568462463038",
+        "tokens": 4935,
         "items": [
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
+            "fortnite 2",
             "fortnite 2"
         ]
     }
