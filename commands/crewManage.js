@@ -103,12 +103,7 @@ module.exports = {
 									collector.on("collect", async i => {
 										if (i.customId == "acceptInvite") {
 											crewDB[getCrew(interaction.user.id)].members.push(interaction.options.getUser("user").id)
-											let crewChId = interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.firstKey()
-											interaction.guild.channels.cache.get(crewChId).permissionOverwrites.edit(interaction.options.getUser("user"),
-												{
-													ViewChannel:true
-												}
-											)
+											interaction.options.getMember("user").roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 											if (interaction.guild.ownerId != interaction.options.getUser("user").id) {
 												if (interaction.guild.members.cache.get(interaction.options.getUser("user").id).displayName.length <= 26) {
 													await i.update({ content: 'Du hast die Einladung akzeptiert!', components: [] });
@@ -146,8 +141,7 @@ module.exports = {
 					if (crewDB[getCrew(interaction.user.id)].owner == interaction.user.id) {
 						if (interaction.options.getUser("user") != undefined) {
 							if (getCrew(interaction.options.getUser("user").id) == getCrew(interaction.user.id)) {
-								let crewChId = interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.firstKey()
-								interaction.guild.channels.cache.get(crewChId).permissionOverwrites.delete(interaction.user)
+								interaction.member.roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 								crewDB[getCrew(interaction.user.id)].owner = interaction.options.getUser("user").id
 								crewDB[getCrew(interaction.options.getUser("user").id)].members.splice(crewDB[getCrew(interaction.options.getUser("user").id)].members.indexOf(interaction.options.getUser("user").id), 1)
 
@@ -167,8 +161,7 @@ module.exports = {
 							interaction.reply({content:"Du hast keinen User angegeben um diesen Besitzer zu machen!", ephemeral:true})
 						}
 					} else {
-						let crewChId = interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.firstKey()
-						interaction.guild.channels.cache.get(crewChId).permissionOverwrites.delete(interaction.user)
+						interaction.member.roles.remove(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 						crewDB[getCrew(interaction.user.id)].members.splice(crewDB[getCrew(interaction.user.id)].members.indexOf(interaction.user.id), 1)
 
 						fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
@@ -221,6 +214,7 @@ module.exports = {
 							let crewChId = interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.firstKey()
 							interaction.guild.channels.cache.get(crewChId).delete()
 							interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).delete()
+							interaction.guild.roles.delete(crewDB[getCrew(interaction.user.id)].role.id)
 						} else {
 							interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).delete()
 						}
@@ -238,8 +232,7 @@ module.exports = {
 				let user = interaction.options.getUser("user")
 				if (crewDB[getCrew(interaction.user.id)].owner == interaction.user.id) {
 					if (getCrew(user.id) == getCrew(interaction.user.id)) {
-						let crewChId = interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.firstKey()
-						interaction.guild.channels.cache.get(crewChId).permissionOverwrites.delete(interaction.options.getUser("user"))
+						interaction.options.getMember("user").roles.remove(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 						crewDB[getCrew(interaction.options.getUser("user").id)].members.splice(crewDB[getCrew(interaction.options.getUser("user").id)].members.indexOf(interaction.options.getUser("user").id), 1)
 
 						fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
@@ -263,23 +256,19 @@ module.exports = {
 						if (interaction.guild.channels.cache.get(crewDB[getCrew(interaction.user.id)].categoryID).children.cache.size > 0) {
 							interaction.reply({content:"Die Kategorie und der Channel sind innermoch vorhanden!",ephemeral:true})
 						} else {
-							interaction.guild.channels.create({name:"crew-chat",type:ChannelType.GuildText,parent:crewDB[getCrew(interaction.user.id)].categoryID}).then(chh => {
+							interaction.guild.channels.create({name:"crew-chat",type:ChannelType.GuildText,parent:crewDB[getCrew(interaction.user.id)].categoryID}).then(async chh => {
 								chh.permissionOverwrites.set([
 									{
 										id: interaction.guild.roles.everyone,
 										deny: [PermissionFlagsBits.ViewChannel]
 									},
 									{
-										id: interaction.user.id,
+										id: interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id),
 										allow: [PermissionFlagsBits.ViewChannel]
 									}
 								])
 								for (let member in crewDB[getCrew(interaction.user.id)].members) {
-									chh.permissionOverwrites.edit(interaction.client.users.cache.get(crewDB[getCrew(interaction.user.id)].members[member]),
-										{
-											ViewChannel:true
-										}
-									)
+									member.roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 								}
 							})
 							interaction.reply({content:"Ich habe die Kategorie gefixxt!",ephemeral:true})
@@ -287,23 +276,19 @@ module.exports = {
 					} else {
 						await interaction.guild.channels.create({name:getCrew(interaction.user.id),type:ChannelType.GuildCategory}).then(ch => {
 							crewDB[getCrew(interaction.user.id)].categoryID = ch.id
-							interaction.guild.channels.create({name:"crew-chat",type:ChannelType.GuildText,parent:ch.id}).then(chh => {
+							interaction.guild.channels.create({name:"crew-chat",type:ChannelType.GuildText,parent:ch.id}).then(async chh => {
 								chh.permissionOverwrites.set([
 									{
 										id: interaction.guild.roles.everyone,
 										deny: [PermissionFlagsBits.ViewChannel]
 									},
 									{
-										id: interaction.user.id,
+										id: interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id),
 										allow: [PermissionFlagsBits.ViewChannel]
 									}
 								])
 								for (let member in crewDB[getCrew(interaction.user.id)].members) {
-									chh.permissionOverwrites.edit(interaction.client.users.cache.get(crewDB[getCrew(interaction.user.id)].members[member]),
-										{
-											ViewChannel:true
-										}
-									)
+									member.roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
 								}
 							})
 						})
@@ -324,16 +309,18 @@ module.exports = {
 		if (interaction.options._subcommand == "create") {
 			if (interaction.options.getString("tag").length <= 3) {
 				if (checkCrew([interaction.options.getString("name"), interaction.options.getString("tag"), interaction.user.id]) == true ) {
+					const crewRole = await interaction.guild.roles.create({name:interaction.options.getString("name")})
 					crewDB[interaction.options.getString("name")] = {
 						name: interaction.options.getString("name"),
 						tag: interaction.options.getString("tag").toUpperCase(),
+						role: crewRole,
 						members: [],
 						owner: interaction.user.id,
 						categoryID: "",
 						tokens: 0,
 						items: []
 					}
-					await interaction.guild.channels.create({name:getCrew(interaction.user.id),type:ChannelType.GuildCategory}).then(ch => {
+					await interaction.guild.channels.create({name:getCrew(interaction.user.id),type:ChannelType.GuildCategory}).then(async ch => {
 						crewDB[getCrew(interaction.user.id)].categoryID = ch.id
 						interaction.guild.channels.create({name:"crew-chat",type:ChannelType.GuildText,parent:ch.id}).then(chh => {
 							chh.permissionOverwrites.set([
@@ -342,11 +329,12 @@ module.exports = {
 									deny: [PermissionFlagsBits.ViewChannel]
 								},
 								{
-									id: interaction.user.id,
+									id: crewRole.id,
 									allow: [PermissionFlagsBits.ViewChannel]
 								}
 							])
 						})
+						interaction.member.roles.add(crewDB[interaction.options.getString("name")].role)
 					})
 					fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
 						console.log(err);
@@ -356,10 +344,10 @@ module.exports = {
 							interaction.reply({ content: "Du hast eine neue Crew namens [" + crewDB[interaction.options.getString("name")].tag + "] " + crewDB[interaction.options.getString("name")].name + " erstellt!", ephemeral: true })
 							interaction.guild.members.cache.get(interaction.user.id).setNickname("[" + crewDB[interaction.options.getString("name")].tag + "] " + interaction.guild.members.cache.get(interaction.user.id).displayName)
 						} else {
-							interaction.reply({ content: "Du hast eine neue Crew namens [" + crewDB[interaction.options.getString("name")].tag + "] " + crewDB[interaction.options.getString("name")].name + "erstellt!\nDeine Name war zu lang also konnte ich den Crew-Tag nicht einfügen.", ephemeral: true })
+							interaction.reply({ content: "Du hast eine neue Crew namens [" + crewDB[interaction.options.getString("name")].tag + "] " + crewDB[interaction.options.getString("name")].name + " erstellt!\nDeine Name war zu lang also konnte ich den Crew-Tag nicht einfügen.", ephemeral: true })
 						}
 					} else {
-						interaction.reply({ content: "Du hast eine neue Crew namens [" + crewDB[interaction.options.getString("name")].tag + "] " + crewDB[interaction.options.getString("name")].name + "erstellt.\nMir fehlen die Rechte deinen Namen zu ändern.", ephemeral: true })
+						interaction.reply({ content: "Du hast eine neue Crew namens [" + crewDB[interaction.options.getString("name")].tag + "] " + crewDB[interaction.options.getString("name")].name + " erstellt.\nMir fehlen die Rechte deinen Namen zu ändern.", ephemeral: true })
 					}
 				} else {
 					interaction.reply({content: checkCrew([interaction.options.getString("name"), interaction.options.getString("tag"), interaction.user.id]), ephemeral: true})

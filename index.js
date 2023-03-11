@@ -62,17 +62,11 @@ client.on("messageCreate", async message => {
 			for (let channel in channelDB) {
 				if (channel != "allcrews" || channel != "redeemitem") {
 					if (channelDB[channel].ownerid == message.author.id) {
-						for (let channel in channelDB) {
-							if (channel != "allcrews" || channel != "redeenitem") {
-								if (channelDB[channel].ownerid == message.author.id) {
-									const embed = new EmbedBuilder()
-									.setAuthor({ name: message.author.tag, iconURL: message.author.avatarURL()})
-									.setColor(0x9CDFBD)
-									.setDescription(message.content)
-									client.guilds.cache.get(channelDB[channel].guildid).channels.cache.get(channelDB[channel].threadID).send({embeds:[embed]})
-								}
-							}
-						}
+						const embed = new EmbedBuilder()
+						.setAuthor({ name: message.author.tag, iconURL: message.author.avatarURL()})
+						.setColor(0x9CDFBD)
+						.setDescription(message.content)
+						client.guilds.cache.get(channelDB[channel].guildid).channels.cache.get(channelDB[channel].threadID).send({embeds:[embed]})
 					}
 				}
 			}
@@ -81,7 +75,7 @@ client.on("messageCreate", async message => {
 })
 
 client.on('interactionCreate', async interaction => {
-	if (interaction.guild == null) {
+	if (interaction.guild == null && interaction.isChatInputCommand()) {
 		interaction.reply({content:"Diese Commands sind nur innerhalb eines Servers verfügbar.",ephemeral:true})
 	} else {
 		if (!interaction.isChatInputCommand()) return;
