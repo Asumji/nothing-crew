@@ -11,7 +11,7 @@ module.exports = {
             let string = ""
             if (Object.keys(crewDB).length >= 1) {
                 for (let crew in crewDB) {
-                    string = string + "**[" + crewDB[crew].tag + "] " + crewDB[crew].name + "**\nOwner: <@!" + crewDB[crew].owner + ">" + "\nMitglieder: " 
+                    string = string + "**[" + crewDB[crew].tag + "] " + crewDB[crew].name + "**\nOwner: <@!" + crewDB[crew].owner + ">" + "\n" + String(crewDB[crew].members.length) + "/" + String(crewDB[crew].limit-1) + " Mitglieder: " 
                     for (let member in crewDB[crew].members) {
                         string = string + "<@!" + crewDB[crew].members[member] + "> "
                     }

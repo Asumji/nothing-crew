@@ -1,12 +1,13 @@
 {
     "fortnite": {
+        "limit": 6,
         "name": "fortnite",
-        "tag": ".",
+        "tag": "FOR",
         "role": {
             "guild": "1008016871209058354",
             "icon": null,
             "unicodeEmoji": null,
-            "id": "1084452254163161158",
+            "id": "1085208582330519623",
             "name": "fortnite",
             "color": 0,
             "hoist": false,
@@ -15,14 +16,20 @@
             "managed": false,
             "mentionable": false,
             "tags": null,
-            "createdTimestamp": 1678623965541
+            "createdTimestamp": 1678804288228
         },
         "members": [
-            "617348743641038858"
+            "257200568022335489",
+            "w",
+            "389461598495965186",
+            "1008017030999453727",
+            "e"
         ],
         "owner": "612625159656046643",
-        "categoryID": "1084452255631163434",
-        "tokens": 255,
-        "items": []
+        "categoryID": "1085226476854583386",
+        "tokens": 12312311807,
+        "items": [
+            "ad"
+        ]
     }
 }

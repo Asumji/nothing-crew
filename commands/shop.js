@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const fs = require("node:fs")
 
+const increaseMemberLimit = "+1 Crew-Mitglied"
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName("shop")
@@ -175,22 +177,30 @@ module.exports = {
                                         console.log(err);
                                     });
 
-                                    if (channelDB["allcrews"] && interaction.guild.channels.cache.get(channelDB["allcrews"].id) != undefined) {
-                                        await interaction.guild.channels.cache.get(channelDB["redeemitem"].id).threads.create({name:"Item Gekauft - " + interaction.options.getString("item"), message:{content:"Die Crew " + crewDB[getCrew(interaction.user.id)].name + " hat gerade " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!\nDiese hat jetzt noch ein Guthaben von " + crewDB[getCrew(interaction.user.id)].tokens + "!\nCrew Owner ID: " + interaction.user.id}}).then(thread => {
-                                            channelDB[thread.id] = {
-                                                ownerid: interaction.user.id,
-                                                threadID: thread.id,
-                                                guildid: thread.guild.id
-                                            }
+                                    if (interaction.options.getString("item") != increaseMemberLimit) {
+                                        interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
+                                        if (channelDB["redeemitem"] && interaction.guild.channels.cache.get(channelDB["redeemitem"].id) != undefined) {
+                                            await interaction.guild.channels.cache.get(channelDB["redeemitem"].id).threads.create({name:"Item Gekauft - " + interaction.options.getString("item"), message:{content:"Die Crew " + crewDB[getCrew(interaction.user.id)].name + " hat gerade " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!\nDiese hat jetzt noch ein Guthaben von " + crewDB[getCrew(interaction.user.id)].tokens + "!\nCrew Owner ID: " + interaction.user.id}}).then(thread => {
+                                                channelDB[thread.id] = {
+                                                    ownerid: interaction.user.id,
+                                                    threadID: thread.id,
+                                                    guildid: thread.guild.id
+                                                }
 
-                                            fs.writeFileSync("./databases/channels.json", JSON.stringify(channelDB, null, 4), err => {
-                                                console.log(err);
-                                            });
-                                        })
-                                        await interaction.user.send("Du hast gerade das Item " + interaction.options.getString("item") + " gekauft, ein Teammiglied wird es für dich bald einlösen.").catch(() => "Die DMs von " + interaction.user.tag + " sind geschlossen also konnte ich kein Ticket öffnen.")
+                                                fs.writeFileSync("./databases/channels.json", JSON.stringify(channelDB, null, 4), err => {
+                                                    console.log(err);
+                                                });
+                                            })
+                                            await interaction.user.send("Du hast gerade das Item " + interaction.options.getString("item") + " gekauft, ein Teammiglied wird es für dich bald einlösen.").catch(() => "Die DMs von " + interaction.user.tag + " sind geschlossen also konnte ich kein Ticket öffnen.")
+                                        }
+                                    } else {
+                                        crewDB[getCrew(interaction.user.id)].limit += 1
+
+                                        fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+                                            console.log(err);
+                                        });
+                                        interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!\nDas neue Limit für deine Crew ist " + crewDB[getCrew(interaction.user.id)].limit + " User!"  ,ephemeral:true})
                                     }
-
-                                    interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte gekauft!",ephemeral:true})
                                 } else {
                                     interaction.reply({content:"Du hast bereits ein offenes Item-Ticket!",ephemeral:true})
                                 }
@@ -209,13 +219,34 @@ module.exports = {
             } else if (interaction.options._subcommand == "sell") {
                 if (crewDB[getCrew(interaction.user.id)].owner == interaction.user.id) {
                     if (shopDB.hasOwnProperty(interaction.options.getString("item"))) {
-                        crewDB[getCrew(interaction.user.id)].items.splice(crewDB[getCrew(interaction.user.id)].items.indexOf(interaction.options.getString("item")), 1)
-                        crewDB[getCrew(interaction.user.id)].tokens += shopDB[interaction.options.getString("item")].price
+                        if (interaction.options.getString("item") != increaseMemberLimit) {
+                            crewDB[getCrew(interaction.user.id)].items.splice(crewDB[getCrew(interaction.user.id)].items.indexOf(interaction.options.getString("item")), 1)
+                            crewDB[getCrew(interaction.user.id)].tokens += shopDB[interaction.options.getString("item")].price
 
-                        fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
-                            console.log(err);
-                        });
-                        interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte verkauft!",ephemeral:true})
+                            fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+                                console.log(err);
+                            });
+
+                            if (channelDB["redeemitem"] && interaction.guild.channels.cache.get(channelDB["redeemitem"].id) != undefined) {
+                                await interaction.guild.channels.cache.get(channelDB["redeemitem"].id).threads.create({name:"Item Verkauft - " + interaction.options.getString("item"), message:{content:"Die Crew " + crewDB[getCrew(interaction.user.id)].name + " hat gerade " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte verkauft!\nDiese hat jetzt wieder ein Guthaben von " + crewDB[getCrew(interaction.user.id)].tokens + "!\nCrew Owner ID: " + interaction.user.id + "\n*Dies ist kein Ticket nur eine Erinnerung mögliche Vorteile des Items zu entfernen.*"}})
+                            }
+
+                            interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte verkauft!",ephemeral:true})
+                        } else {
+                            if (crewDB[getCrew(interaction.user.id)].limit > crewDB[getCrew(interaction.user.id)].members.length+1) {
+                                crewDB[getCrew(interaction.user.id)].items.splice(crewDB[getCrew(interaction.user.id)].items.indexOf(interaction.options.getString("item")), 1)
+                                crewDB[getCrew(interaction.user.id)].tokens += shopDB[interaction.options.getString("item")].price
+                                crewDB[getCrew(interaction.user.id)].limit -= 1
+    
+                                fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+                                    console.log(err);
+                                });
+
+                                interaction.reply({content:"Du hast " + interaction.options.getString("item") + " für " + shopDB[interaction.options.getString("item")].price + " Punkte verkauft!",ephemeral:true})
+                            } else {
+                                interaction.reply({content:"Du kannst Mitglied-Limit Items nur verkaufen wenn ein Platz frei ist!",ephemeral:true})
+                            }
+                        }
                     } else {
                         interaction.reply({content:"Dieses Item ist nicht in dem Crew-Inventar!",ephemeral:true})
                     }

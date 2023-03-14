@@ -31,7 +31,7 @@ module.exports = {
 									fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
 										console.log(err);
 									});
-									interaction.reply({content:"Du hast " + interaction.options.getString("value") + interaction.options.getString("crew") + " Punkte gegeben!", ephemeral:true})
+									interaction.reply({content:"Du hast " + interaction.options.getString("value") + " " + interaction.options.getString("crew") + " Punkte gegeben!", ephemeral:true})
 								} else {
 									interaction.reply({content:"Deine Crew hat nicht genug Punkte!", ephemeral:true})
 								}

@@ -16,5 +16,11 @@
         "description": "awd",
         "price": 5,
         "repeatable": false
+    },
+    "+1 Crew-Mitglied": {
+        "name": "+1 Crew-Mitglied",
+        "description": "Füge noch eine weitere Person deiner Crew hinzu",
+        "price": 500,
+        "repeatable": true
     }
 }

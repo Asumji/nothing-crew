@@ -176,6 +176,17 @@ client.once('ready', () => {
 		if (channelDB["quests"] && client.guilds.cache.get(channelDB["quests"].guildid).channels.cache.get(channelDB["quests"].id) != undefined) {
 			const time = new Date(Date.now()).toLocaleTimeString("de-DE")
 			if (time.toString().split(":")[0] == channelDB["quests"].time.toString() && channelDB["quests"].sent == false) {
+
+				for (crew in crewDB) {
+					if (crewDB[crew].members.length < 2) {
+						delete crewDB[crew]
+
+						fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+							console.log(err);
+						});
+					}
+				}
+
 				if (!is2ndSunday()) {
 					for (user in questDB) {
 						if (questDB[user].msgs >= channelDB["quests"].msgs && channelDB["quests"].msgs != 0) {

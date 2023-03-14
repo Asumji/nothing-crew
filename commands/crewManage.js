@@ -93,45 +93,54 @@ module.exports = {
 					.setStyle(ButtonStyle.Danger),
 				);
 				if (interaction.options.getUser("user") != interaction.user) {
-					if (interaction.options.getUser("user").id != interaction.applicationId)
-					if (checkCrew([interaction.options.getUser("user").id]) == true) {
-						if (interaction.options.getUser("user").id != interaction.applicationId) {
-							if (checkCrew([interaction.user.id]) == "Du besitzt bereits eine Crew!") {
-								interaction.options.getUser("user").send({content: interaction.user.username + " hat dich zu einer Crew eingeladen!", components: [row]}).then(ch=> {
-									interaction.reply({content: "Du hast <@!" + interaction.options.getUser("user") + "> zu deiner Crew eingeladen!", ephemeral:true})
-									const collector = ch.createMessageComponentCollector({ time: 15000 });
-									collector.on("collect", async i => {
-										if (i.customId == "acceptInvite") {
-											crewDB[getCrew(interaction.user.id)].members.push(interaction.options.getUser("user").id)
-											interaction.options.getMember("user").roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
-											if (interaction.guild.ownerId != interaction.options.getUser("user").id) {
-												if (interaction.guild.members.cache.get(interaction.options.getUser("user").id).displayName.length <= 26) {
-													await i.update({ content: 'Du hast die Einladung akzeptiert!', components: [] });
-													interaction.guild.members.cache.get(interaction.options.getUser("user").id).setNickname("[" + crewDB[getCrew(interaction.user.id)].tag + "] " + interaction.guild.members.cache.get(interaction.options.getUser("user").id).displayName)
-												} else {
-													await i.update({ content: 'Du hast die Einladung akzeptiert!\nDeine Name war zu lang also konnte ich den Crew-Tag nicht einfügen!', components: [] });
-													interaction.guild.members.cache.get(interaction.options.getUser("user").id).setNickname("[" + crewDB[getCrew(interaction.user.id)].tag + "] " + "TooLong")
-												}
-											} else {
-												await i.update({ content: 'Du hast die Einladung akzeptiert!\nMir fehlen die Rechte deinen Namen zu ändern.', components: [] });
-											}
+					if (interaction.options.getUser("user").id != interaction.applicationId) {
+						if (checkCrew([interaction.options.getUser("user").id]) == true) {
+							if (interaction.options.getUser("user").id != interaction.applicationId) {
+								if (checkCrew([interaction.user.id]) == "Du besitzt bereits eine Crew!") {
+									if (crewDB[getCrew(interaction.user.id)].limit > crewDB[getCrew(interaction.user.id)].members.length+1) {
+										interaction.options.getUser("user").send({content: interaction.user.username + " hat dich zu einer Crew eingeladen!", components: [row]}).then(ch=> {
+											interaction.reply({content: "Du hast <@!" + interaction.options.getUser("user") + "> zu deiner Crew eingeladen!", ephemeral:true})
+											const collector = ch.createMessageComponentCollector({ time: 15000 });
+											collector.on("collect", async i => {
+												if (i.customId == "acceptInvite") {
+													if (crewDB[getCrew(interaction.user.id)].limit > crewDB[getCrew(interaction.user.id)].members.length+1) {
+														crewDB[getCrew(interaction.user.id)].members.push(interaction.options.getUser("user").id)
+														interaction.options.getMember("user").roles.add(await interaction.guild.roles.cache.get(crewDB[getCrew(interaction.user.id)].role.id))
+														if (interaction.guild.ownerId != interaction.options.getUser("user").id) {
+															if (interaction.guild.members.cache.get(interaction.options.getUser("user").id).displayName.length <= 26) {
+																await i.update({ content: 'Du hast die Einladung akzeptiert!', components: [] });
+																interaction.guild.members.cache.get(interaction.options.getUser("user").id).setNickname("[" + crewDB[getCrew(interaction.user.id)].tag + "] " + interaction.guild.members.cache.get(interaction.options.getUser("user").id).displayName)
+															} else {
+																await i.update({ content: 'Du hast die Einladung akzeptiert!\nDeine Name war zu lang also konnte ich den Crew-Tag nicht einfügen!', components: [] });
+																interaction.guild.members.cache.get(interaction.options.getUser("user").id).setNickname("[" + crewDB[getCrew(interaction.user.id)].tag + "] " + "TooLong")
+															}
+														} else {
+															await i.update({ content: 'Du hast die Einladung akzeptiert!\nMir fehlen die Rechte deinen Namen zu ändern.', components: [] });
+														}
 
-											fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
-												console.log(err);
+														fs.writeFileSync("./databases/crew.json", JSON.stringify(crewDB, null, 4), err => {
+															console.log(err);
+														});
+													}
+												} else {
+													await i.update({ content: 'Du hast die Einladung abgelehnt!', components: [] });
+												}
 											});
-										} else {
-											await i.update({ content: 'Du hast die Einladung abgelehnt!', components: [] });
-										}
-									});
-								}).catch(() => interaction.reply({content:"Dieser User nimmt keine DMs an!",ephemeral:true}))
+										}).catch(() => interaction.reply({content:"Dieser User nimmt keine DMs an!",ephemeral:true}))
+									} else {
+										interaction.reply({content:"Deine Crew hat die maximale Anzahl an Usern.",ephemeral:true})
+									}
+								} else {
+									interaction.reply({content:"Du besitzt diese Crew nicht!",ephemeral:true})
+								}
 							} else {
-								interaction.reply({content:"Du besitzt diese Crew nicht!",ephemeral:true})
+								interaction.reply({content:"Ich kann in keine Crew eingeladen werden!",ephemeral:true})
 							}
 						} else {
-							interaction.reply({content:"Ich kann in keine Crew eingeladen werden!",ephemeral:true})
+							interaction.reply({content: "<@!" + interaction.options.getUser("user") + "> ist bereits in einer Crew! Benutze /crew leave um diese zu verlassen!", ephemeral:true})
 						}
 					} else {
-						interaction.reply({content: "<@!" + interaction.options.getUser("user") + "> ist bereits in einer Crew! Benutze /crew leave um diese zu verlassen!", ephemeral:true})
+						interaction.reply({content: "Du kannst mich nicht einladen!", ephemeral:true})	
 					}
 				} else {
 					interaction.reply({content: "Du kannst dich selbst nicht einladen!", ephemeral:true})
@@ -311,6 +320,7 @@ module.exports = {
 				if (checkCrew([interaction.options.getString("name"), interaction.options.getString("tag"), interaction.user.id]) == true ) {
 					const crewRole = await interaction.guild.roles.create({name:interaction.options.getString("name")})
 					crewDB[interaction.options.getString("name")] = {
+						limit: 5,
 						name: interaction.options.getString("name"),
 						tag: interaction.options.getString("tag").toUpperCase(),
 						role: crewRole,

@@ -17,7 +17,10 @@ module.exports = {
                         console.log(err);
                     });
                     interaction.reply({content:"Das Item-Ticket wurde erfolgreich geschlossen!"})
-                    interaction.channel.setArchived()
+
+                    setTimeout(() => {
+                        interaction.channel.setArchived()
+                    },1000)
                 } else {
                     interaction.reply({content:"Dieser Command kann hier nicht genutzt werden!",ephemeral:true})
                 }
