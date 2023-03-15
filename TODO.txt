@@ -1,2 +1,5 @@
-#rolle statt intern
-#siehe Discord: quests
+#quests
+    | golden
+#crew limit
+    | min 3 bei erstellung
+    | 5 crew member limit + slots kaufen

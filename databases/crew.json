@@ -1,1 +1,28 @@
-{}
+{
+    "fortnite": {
+        "name": "fortnite",
+        "tag": ".",
+        "role": {
+            "guild": "1008016871209058354",
+            "icon": null,
+            "unicodeEmoji": null,
+            "id": "1084452254163161158",
+            "name": "fortnite",
+            "color": 0,
+            "hoist": false,
+            "rawPosition": 1,
+            "permissions": "1071698660929",
+            "managed": false,
+            "mentionable": false,
+            "tags": null,
+            "createdTimestamp": 1678623965541
+        },
+        "members": [
+            "617348743641038858"
+        ],
+        "owner": "612625159656046643",
+        "categoryID": "1084452255631163434",
+        "tokens": 255,
+        "items": []
+    }
+}
