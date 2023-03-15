@@ -54,7 +54,7 @@ module.exports = {
 								interaction.reply({content:"Du besitzst dieses Item nicht!", ephemeral:true})
 							}
 						} else {
-							interaction.reply({content:"Der Typ existiert nicht!\n(Das sollte eigentlich nicht passieren bei vermehrten Auftreten bitte Asumji#2143 dmen.)", ephemeral:true})
+							interaction.reply({content:"Der Typ existiert nicht!\n(Das sollte eigentlich nicht passieren bei vermehrtem Auftreten bitte Asumji#2143 dmen.)", ephemeral:true})
 						}
 					} else {
 						interaction.reply({content:"Du kansnt nicht mit deiner eigenen Crew handeln!", ephemeral:true})

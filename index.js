@@ -29,7 +29,8 @@ const crewDB = db("crew.json")
 const shopDB = db("shop.json")
 const channelDB = db("channels.json")
 const questDB = db("quests.json")
-module.exports = { crewDB, shopDB, client, channelDB }
+const msgDB = db("msgs.json")
+module.exports = { crewDB, shopDB, client, channelDB, msgDB }
 
 function getCrew(userID) {
 	for (let crew in crewDB) {
@@ -412,7 +413,74 @@ client.on("messageCreate", async message => {
 			}
 		}
 	}
+
+	if (message.guild != null && message.author.id != client.user.id) {
+		if (!msgDB[message.author.id]) {
+			msgDB[message.author.id] = {
+				msgsDaily: 1,
+				topMonth: 0
+			}
+		} else {
+			msgDB[message.author.id].msgsDaily += 1
+		}
+
+		if (!msgDB["reset"]) {
+			msgDB["reset"] = {
+				sent: false,
+				month: new Date(Date.now()).getMonth()
+			}
+		}
+
+		fs.writeFileSync("./databases/msgs.json", JSON.stringify(msgDB, null, 4), err => {
+			console.log(err);
+		});
+	}
 })
+
+setInterval(() => {
+	if (msgDB["reset"]) {
+		//console.log(new Date(Date.now() + 60000 * 60 * 8).toLocaleTimeString("de-DE"))
+		if (new Date(Date.now()).toLocaleTimeString("de-DE").split(":")[0] == "00") {
+			if (msgDB["reset"].sent == false) {	
+				msgDB["reset"].sent = true
+
+				for (user in msgDB) {
+					if (user != "reset") {
+						if (msgDB[user].msgsDaily > msgDB[user].topMonth) {
+							msgDB[user].topMonth = msgDB[user].msgsDaily
+						}
+						msgDB[user].msgsDaily = 0
+
+						fs.writeFileSync("./databases/msgs.json", JSON.stringify(msgDB, null, 4), err => {
+							console.log(err);
+						});
+					}
+				}
+			}
+		} else {
+			if (msgDB["reset"].sent == true) {
+				msgDB["reset"].sent = false
+
+				fs.writeFileSync("./databases/msgs.json", JSON.stringify(msgDB, null, 4), err => {
+					console.log(err);
+				});
+			}
+		}
+
+		if (new Date(Date.now()).getMonth() != msgDB["reset"].month) {
+			for (user in msgDB) {
+				if (user != "reset") {
+					msgDB[user].topMonth = 0
+					msgDB["reset"].month = new Date(Date.now()).getMonth()
+
+					fs.writeFileSync("./databases/msgs.json", JSON.stringify(msgDB, null, 4), err => {
+						console.log(err);
+					});
+				}
+			}
+		}
+	}
+}, 1000);
 
 client.on('interactionCreate', async interaction => {
 	if (interaction.guild == null && interaction.isChatInputCommand()) {
