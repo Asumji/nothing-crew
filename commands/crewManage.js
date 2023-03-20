@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 const fs = require("node:fs");
 
 module.exports = {
@@ -37,7 +37,11 @@ module.exports = {
 		)
 		.addSubcommand(sub => 
 			sub.setName("fix")
-			.setDescription("Sollte deine Crew-Kategorie oder der Hauptchannel weg sein benutze diesen Command!")
+			.setDescription("Sollte deine Crew-Kategorie oder der Hauptchannel weg sein benutze diesen Command")
+		)
+		.addSubcommand(sub =>
+			sub.setName("quests")
+			.setDescription("Zeigt den Aufgabenfortschritt deiner Crew an")
 		),
 	async execute(interaction) {
 		function checkCrew(entry) {
@@ -78,7 +82,7 @@ module.exports = {
 			}
 		}
 
-		const { crewDB } = require("../index.js")
+		const { crewDB, questDB, channelDB } = require("../index.js")
 		if (crewDB[getCrew(interaction.user.id)]) {
 			if (interaction.options._subcommand == "invite") {
 				const row = new ActionRowBuilder()
@@ -308,6 +312,29 @@ module.exports = {
 					}
 				} else {
 					interaction.reply({content:"Du bist nicht der Owner deiner Crew!",ephemeral:true})
+				}
+			} else if (interaction.options._subcommand == "quests") {
+				if (channelDB["quests"]) {
+					let questDesc = ``
+					if (questDB[interaction.user.id]) {
+						questDesc = `<@!${interaction.user.id}>:\nNachrichten: ${questDB[interaction.user.id].msgs}/${channelDB["quests"].msgs} (${Math.floor(questDB[interaction.user.id].msgs*100/channelDB["quests"].msgs)}%)\nVoice: ${questDB[interaction.user.id].voice}/${channelDB["quests"].voice} Stunden (${Math.floor(questDB[interaction.user.id].voice*100/channelDB["quests"].voice)}%)\nBilder: ${questDB[interaction.user.id].pics}/${channelDB["quests"].pics} (${Math.floor(questDB[interaction.user.id].pics*100/channelDB["quests"].pics)}%)`
+					}
+
+					for (let i = 0;i<crewDB[getCrew(interaction.user.id)].members.length;i++) {
+						if (questDB[crewDB[getCrew(interaction.user.id)].members[i]]) {
+							questDesc += `\n\n<@!${crewDB[getCrew(interaction.user.id)].members[i]}>:\nNachrichten: ${questDB[crewDB[getCrew(interaction.user.id)].members[i]].msgs}/${channelDB["quests"].msgs} (${Math.floor(questDB[crewDB[getCrew(interaction.user.id)].members[i]].msgs*100/channelDB["quests"].msgs)}%)\nVoice: ${questDB[crewDB[getCrew(interaction.user.id)].members[i]].voice}/${channelDB["quests"].voice} Stunden (${Math.floor(questDB[crewDB[getCrew(crewDB[getCrew(interaction.user.id)].members[i])].members[i]].voice*100/channelDB["quests"].voice)}%)\nBilder: ${questDB[crewDB[getCrew(interaction.user.id)].members[i]].pics}/${channelDB["quests"].pics} (${Math.floor(questDB[crewDB[getCrew(interaction.user.id)].members[i]].pics*100/channelDB["quests"].pics)}%)`
+						}
+					}
+
+					const embed = new EmbedBuilder()
+					.setColor("Random")
+					.setTitle("Crew-Aufgaben Fortschritt")
+					.setDescription(questDesc)
+
+
+					interaction.reply({embeds:[embed],ephemeral:true})
+				} else {
+					interaction.reply({content:"Es gibt zurzeit keine Aufgaben.",ephemeral:true})
 				}
 			}
 		} else {

@@ -30,7 +30,7 @@ const shopDB = db("shop.json")
 const channelDB = db("channels.json")
 const questDB = db("quests.json")
 const msgDB = db("msgs.json")
-module.exports = { crewDB, shopDB, client, channelDB, msgDB }
+module.exports = { crewDB, shopDB, client, channelDB, msgDB, questDB }
 
 function getCrew(userID) {
 	for (let crew in crewDB) {
@@ -39,6 +39,16 @@ function getCrew(userID) {
 		}
 	}
 	return undefined
+}
+
+function round(number) {
+	let middle = number.toString()[1]
+	if (Number(middle) >= 5) {
+		number = Number(number.toString()[0] + "50")
+	} else {
+		number = Number(number.toString()[0] + "00")
+	}
+	return number
 }
 
 let is2ndSundayLet = false
@@ -74,12 +84,12 @@ function getRndInt(min,max) { return Math.floor(Math.random() * (max - min)) + m
 function generateQuests() {
 	let msgs, invites, voice, pics
 	if (is2ndSundayLet) {
-		msgs = getRndInt(50,101)
+		msgs = round(getRndInt(50,101))
 		invites = getRndInt(1,4)
 		voice = getRndInt(2,5)
 		pics = getRndInt(1,6)
 	} else {
-		msgs = getRndInt(100,301)
+		msgs = round(getRndInt(100,301))
 		invites = getRndInt(2,6)
 		voice = getRndInt(4,7)
 		pics = getRndInt(5,11)
